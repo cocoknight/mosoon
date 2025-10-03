@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "641487561401",
+    "project_id": "mosoon-9b9da",
+    "storage_bucket": "mosoon-9b9da.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:641487561401:android:aaae1f8e24213a21417168",
+        "android_client_info": {
+          "package_name": "com.mosoon.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9A8sX123OX5vGEUm0ZEvAkSpEBoKvobw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
