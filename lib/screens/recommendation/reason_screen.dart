@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
-import '../../services/recommendation_service.dart';
+
 
 class RecommendationReasonScreen extends StatelessWidget {
-  final RecommendationService service;
-  const RecommendationReasonScreen({required this.service, Key? key}) : super(key: key);
+  final String prompt;
+  final String response;
+  final String strategyLabel;
+
+  const RecommendationReasonScreen({
+    required this.prompt,
+    required this.response,
+    required this.strategyLabel,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final prompt = service.lastPrompt ?? "프롬프트 없음";
-    final response = service.lastRawResponse ?? "응답 없음";
-
     return Scaffold(
-      appBar: AppBar(title: const Text("추천 근거 보기")),
+      appBar: AppBar(title: Text("$strategyLabel 추천 근거")),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(

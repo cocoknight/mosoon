@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/persona.dart';
@@ -27,15 +28,24 @@ class _PersonaListScreenState extends ConsumerState<PersonaListScreen> {
     final personas = await service.fetchPersonas();
     ref.read(personaListProvider.notifier).state = personas;
     setState(() => isLoading = false);
-  }
+  }             
 
-  void _selectPersona(Persona persona) {
-    ref.read(personaProvider.notifier).state = persona;
-    Navigator.pop(context); // Dashboard로 돌아가기
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("${persona.name} 페르소나가 선택되었습니다")),
-    );
-  }
+  Future<void> _selectPersona(Persona persona) async{
+  // ✅ 선택된 ID를 상태에 저장
+  ref.read(selectedPersonaIdProvider.notifier).state = persona.id;
+
+  // ✅ Firestore에도 저장
+  await FirebaseFirestore.instance
+      .collection("settings")
+      .doc("selectedPersona")
+      .set({"id": persona.id});
+
+  Navigator.pop(context);
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text("${persona.name} 페르소나가 선택되었습니다")),
+  );
+
+}
 
   void _editPersona(Persona persona) {
     Navigator.push(

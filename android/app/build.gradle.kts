@@ -8,6 +8,7 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+
 android {
     namespace = "com.mosoon.app"
     compileSdk = flutter.compileSdkVersion
