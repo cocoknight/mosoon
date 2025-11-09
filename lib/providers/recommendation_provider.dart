@@ -19,14 +19,31 @@ import '../models/recommendation.dart';
 // });
 
 
+// final groupedRecommendationProvider = FutureProvider.family<Map<String, List<Recommendation>>, Persona>((ref, persona) async {
+//   final strategies = StrategyRegistry.getFor(persona);
+//   final Map<String, List<Recommendation>> grouped = {};
+
+//   for (final strategy in strategies) {
+//     final recs = await strategy.recommend(persona);
+//     grouped[strategy.id] = recs;
+//   }
+
+//   return grouped;
+// });
 final groupedRecommendationProvider = FutureProvider.family<Map<String, List<Recommendation>>, Persona>((ref, persona) async {
-  final strategies = StrategyRegistry.getFor(persona);
+  final strategies = StrategyRegistry.getFor(persona); // ✅ 기존 방식으로 복원
+
   final Map<String, List<Recommendation>> grouped = {};
 
   for (final strategy in strategies) {
-    final recs = await strategy.recommend(persona);
-    grouped[strategy.id] = recs;
+    try {
+      final recs = await strategy.recommend(persona);
+      grouped[strategy.id] = recs;
+    } catch (e) {
+      grouped[strategy.id] = [];
+    }
   }
 
   return grouped;
 });
+

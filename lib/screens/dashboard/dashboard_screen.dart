@@ -1020,7 +1020,6 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedId = ref.watch(selectedPersonaIdProvider);
-    
     final personaAsync = ref.watch(personaProvider(selectedId));
 
     return personaAsync.when(
@@ -1037,88 +1036,91 @@ class DashboardScreen extends ConsumerWidget {
           );
         }
 
-        final grouped = ref.watch(groupedRecommendationProvider(persona));
+        final groupedAsync = ref.watch(groupedRecommendationProvider(persona));
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text('안녕하세요, ${persona.name}님 👋'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.person),
-                tooltip: "페르소나 관리",
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const PersonaListScreen()),
+        return groupedAsync.when(
+          loading: () => const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          ),
+          error: (err, _) => Scaffold(
+            body: Center(child: Text("추천을 불러올 수 없습니다: $err")),
+          ),
+          data: (groupedItems) {
+            return Scaffold(
+              appBar: AppBar(
+                title: Text('안녕하세요, ${persona.name}님 👋'),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.person),
+                    tooltip: "페르소나 관리",
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const PersonaListScreen()),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              body: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: groupedItems.length,
+                itemBuilder: (context, strategyIndex) {
+                  final strategyId = groupedItems.keys.elementAt(strategyIndex);
+                  final recs = groupedItems[strategyId]!;
+                  final style = strategyStyles[strategyId];
+
+                  final label = style?["label"] as String? ?? strategyId;
+                  final icon = style?["icon"] as IconData? ?? Icons.star;
+                  final color = style?["color"] as Color? ?? Colors.grey;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 220,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: recs.length,
+                          itemBuilder: (context, index) {
+                            final rec = recs[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: StrategyCard(
+                                recommendation: rec,
+                                icon: icon,
+                                backgroundColor: color,
+                                onLocationTap: strategyId == "kakao"
+                                    ? () => _launchKakaoMap(context, rec.title)
+                                    : null,
+                                onReviewTap: strategyId == "kakao"
+                                    ? () => _launchKakaoReview(context, rec)
+                                    : null,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
                   );
                 },
               ),
-            ],
-          ),
-          body: grouped.when(
-            data: (groupedItems) => ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: groupedItems.length,
-              itemBuilder: (context, strategyIndex) {
-                final strategyId = groupedItems.keys.elementAt(strategyIndex);
-                final recs = groupedItems[strategyId]!;
-                final style = strategyStyles[strategyId];
-
-                final label = style?["label"] as String? ?? strategyId;
-                final icon = style?["icon"] as IconData? ?? Icons.star;
-                final color = style?["color"] as Color? ?? Colors.grey;
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 220,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: recs.length,
-                        itemBuilder: (context, index) {
-                          final rec = recs[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 12),
-                            child: StrategyCard(
-                              recommendation: rec,
-                              icon: icon,
-                              backgroundColor: color,
-                              onLocationTap: strategyId == "kakao"
-                                  ? () => _launchKakaoMap(context, rec.title)
-                                  : null,
-                              onReviewTap: strategyId == "kakao"
-                                  ? () => _launchKakaoReview(context, rec)
-                                  : null,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                );
-              },
-            ),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, _) => Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text('추천을 불러올 수 없습니다: $err'),
-            ),
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: 0,
-            onTap: (index) {
-              // TODO: 화면 전환 처리
-            },
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
-              BottomNavigationBarItem(icon: Icon(Icons.star), label: '추천'),
-              BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
-            ],
-          ),
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: 0,
+                onTap: (index) {
+                  // TODO: 화면 전환 처리
+                },
+                items: const [
+                  BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
+                  BottomNavigationBarItem(icon: Icon(Icons.star), label: '추천'),
+                  BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
+                ],
+              ),
+            );
+          },
         );
       },
     );

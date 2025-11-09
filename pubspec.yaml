@@ -52,7 +52,9 @@ dependencies:
 
   # Firebase Storage (이미지 업로드용)
   firebase_storage: ^11.7.4
- 
+  
+  #geolocator
+  geolocator: ^10.1.0
 
 dev_dependencies:
   flutter_test:
